@@ -8,10 +8,10 @@ from django.utils.translation import gettext_lazy as _
 # Create your models here.
 
 class Concert(models.Model):
-    # concert_name
-    # duration
-    # city
-    # date
+    concert_name = models.CharField(max_length=255)  # Field for concert name, limited to 255 characters
+    duration = models.IntegerField() 
+    city = models.CharField(max_length=255)  # Field for city, limited to 255 characters
+    date = models.DateField(default=datetime.now) 
 
     def __str__(self):
         return self.concert_name
@@ -41,12 +41,12 @@ class ConcertAttending(models.Model):
 
 
 class Photo(models.Model):
-    # id
-    # pic_url
-    # event_country
-    # event_state
-    # event_city
-    # event_date
+    id =  models.IntegerField(primary_key=True) # Explicitly defining id field as AutoField for the primary key
+    pic_url = models.CharField(max_length=1000)  # Field for the URL of the photo, limited to 1000 characters
+    event_country = models.CharField(max_length=255)  # Field for event country, limited to 255 characters
+    event_state = models.CharField(max_length=255)  # Field for event state, limited to 255 characters
+    event_city = models.CharField(max_length=255)  # Field for event city, limited to 255 characters
+    event_date = models.DateField(default=datetime.now)  # Field for event date, stores date in YYYY-MM-DD format
 
     class Meta:
         managed = False
@@ -56,9 +56,9 @@ class Photo(models.Model):
 
 
 class Song(models.Model):
-    # id
-    # title
-    # lyrics
+    id =  models.IntegerField(primary_key=True)  # Explicitly defining id field as AutoField for the primary key
+    title = models.CharField(max_length=255)  # Field for the title of the song, limited to 255 characters
+    lyrics = models.TextField()  # Field for the lyrics of the song, can store large text
 
     class Meta:
         managed = False
