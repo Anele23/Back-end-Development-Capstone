@@ -14,33 +14,69 @@ import requests as req
 # Create your views here.
 
 def signup(request):
-    pass
-
+    if request.method == "POST":
+        username = request.POST.get("username")
+        password = request.POST.get("password")
+        try:
+            user = User.objects.filter(username=username).first()
+            if user:
+                return render(request, "signup.html", {"form": SignUpForm, "message": "user already exist"})
+            else:
+                user = User.objects.create(
+                    username=username, password=make_password(password))
+                login(request, user)
+                return HttpResponseRedirect(reverse("index"))
+        except User.DoesNotExist:
+            return render(request, "signup.html", {"form": SignUpForm})
+    return render(request, "signup.html", {"form": SignUpForm})
 
 def index(request):
     return render(request, "index.html")
 
 
 def songs(request):
-    # songs = {"songs":[]}
-    # return render(request, "songs.html", {"songs": [insert list here]})
-    pass
+    songs = req.get("http://songs-sn-labs-anelek.labs-prod-openshift-san-a45631dc5778dc6371c67d206ba9ae5c-0000.us-east.containers.appdomain.cloud/song").json()
+    return render(request, "songs.html", {"songs": songs["songs"]})
 
 
 def photos(request):
-    # photos = []
-    # return render(request, "photos.html", {"photos": photos})
-    pass
+    photos = req.get("https://pictures.197lyzorbfmj.us-south.codeengine.appdomain.cloud/picture").json()
+    return render(request, "photos.html", {"photos": photos})
 
 def login_view(request):
-    pass
+    if request.method == "POST":
+        username = request.POST.get("username")
+        password = request.POST.get("password")
+        try:
+            user = User.objects.get(username=username)
+            if user.check_password(password):
+                login(request, user)
+                return HttpResponseRedirect(reverse("index"))
+        except User.DoesNotExist:
+            return render(request, "login.html", {"form": LoginForm})
+    return render(request, "login.html", {"form": LoginForm})
 
 def logout_view(request):
-    pass
+    logout(request)
+    return HttpResponseRedirect(reverse("login"))
 
 def concerts(request):
-    pass
-
+    if request.user.is_authenticated:
+        lst_of_concert = []
+        concert_objects = Concert.objects.all()
+        for item in concert_objects:
+            try:
+                status = item.attendee.filter(
+                    user=request.user).first().attending
+            except:
+                status = "-"
+            lst_of_concert.append({
+                "concert": item,
+                "status": status
+            })
+        return render(request, "concerts.html", {"concerts": lst_of_concert})
+    else:
+        return HttpResponseRedirect(reverse("login"))
 
 def concert_detail(request, id):
     if request.user.is_authenticated:
